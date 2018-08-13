@@ -10,15 +10,23 @@ import javax.servlet.http.HttpServletResponse;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping(value = "/projects")
 public class ProjectController {
 
     private final ProjectService projectService;
 
-    @PostMapping(value = "/projects")
+    @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void createProject(@RequestBody Project project, HttpServletResponse response) {
-        int projectId = projectService.createProject(project);
+    public void saveProject(@RequestBody Project project, HttpServletResponse response) {
+        int projectId = projectService.saveProject(project);
         response.addHeader("Content-Location", "/projects/" + projectId);
+    }
+
+    @GetMapping(value = "/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public Project retrieveProject(@PathVariable int id) {
+        return projectService.retrieveProjectById(id);
     }
 
 }

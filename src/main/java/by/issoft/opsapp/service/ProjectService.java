@@ -5,9 +5,11 @@ import by.issoft.opsapp.model.ProjectModel;
 import by.issoft.opsapp.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityExistsException;
-import javax.transaction.Transactional;
+import javax.persistence.EntityNotFoundException;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -16,12 +18,21 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
 
     @Transactional
-    public int createProject(Project project) {
+    public int saveProject(Project project) {
         if (projectRepository.existsByName(project.getName())) {
             throw new EntityExistsException("Project '" + project.getName() + "' already exists!");
         }
         ProjectModel projectModel = projectRepository.save(toProjectModel(project));
         return projectModel.getId();
+    }
+
+    @Transactional(readOnly = true)
+    public Project retrieveProjectById(int id) {
+        Optional<ProjectModel> optionalProjectModel = projectRepository.findById(id);
+        if (!optionalProjectModel.isPresent()) {
+            throw new EntityNotFoundException("Project with id = " + id + " was not found!");
+        }
+        return toProject(optionalProjectModel.get());
     }
 
     private ProjectModel toProjectModel(Project project) {
@@ -32,4 +43,12 @@ public class ProjectService {
         return projectModel;
     }
 
+    private Project toProject(ProjectModel projectModel) {
+        return new Project(
+            projectModel.getId(),
+            projectModel.getName(),
+            projectModel.getAlternativeName(),
+            projectModel.getPeopleCount()
+        );
+    }
 }

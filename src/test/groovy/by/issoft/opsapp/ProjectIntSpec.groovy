@@ -3,6 +3,7 @@ package by.issoft.opsapp
 import by.issoft.opsapp.dto.Project
 import by.issoft.opsapp.repository.ProjectRepository
 import by.issoft.opsapp.service.ProjectService
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
@@ -14,9 +15,11 @@ import spock.lang.Specification
 
 import javax.persistence.EntityExistsException
 import javax.persistence.EntityManager
+import javax.persistence.EntityNotFoundException
 import javax.persistence.PersistenceContext
 
 import static groovy.json.JsonOutput.toJson
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 
 @SpringBootTest
@@ -41,7 +44,7 @@ class ProjectIntSpec extends Specification {
             def project = new Project(id, projectName, alternativeName, peopleCount)
 
         when:
-            int projectId = projectService.createProject(project)
+            int projectId = projectService.saveProject(project)
             flushAndClear()
 
         then:
@@ -81,12 +84,72 @@ class ProjectIntSpec extends Specification {
             def project = retrieveProject()
 
         when: "throws exception "
-            projectService.createProject(project)
+            projectService.saveProject(project)
             flushAndClear()
-            projectService.createProject(project)
+            projectService.saveProject(project)
 
         then:
             thrown EntityExistsException
+    }
+
+    def "it should return the project by id"() {
+        given:
+            def project = retrieveProject()
+            int projectId = projectService.saveProject(project)
+            flushAndClear()
+
+        when:
+            def projectInDb = projectService.retrieveProjectById(projectId)
+
+        then:
+            with(projectInDb) {
+                id == projectId
+                name == project.name
+                alternativeName == project.alternativeName
+                peopleCount == project.peopleCount
+            }
+    }
+
+    def "it should throw EntityNotFoundException when project's id does not exists in the db"() {
+        given:
+            int fakeId = Integer.MIN_VALUE
+
+        when:
+            projectService.retrieveProjectById(fakeId)
+
+        then:
+            thrown EntityNotFoundException
+    }
+
+    def "it should check response body after getting the project"() {
+        given:
+            def project = retrieveProject()
+            int projectId = projectService.saveProject(project)
+            project.setId(projectId)
+            flushAndClear()
+
+        when:
+            def response = mockMvc.perform(get('/projects/' + projectId)).andReturn().getResponse()
+
+        then:
+            with(response) {
+                status == HttpStatus.OK.value()
+                project == retrieveProjectFromJson(getContentAsString())
+            }
+    }
+
+    def "it should check response status of the incorrect get request"() {
+        given:
+            int fakeId = Integer.MIN_VALUE
+
+        when:
+            def response = mockMvc.perform(get('/projects/' + fakeId)).andReturn().getResponse()
+
+        then:
+            with(response) {
+                status == HttpStatus.NOT_FOUND.value()
+                !getContentAsString().empty
+            }
     }
 
     def retrieveProject() {
@@ -96,6 +159,11 @@ class ProjectIntSpec extends Specification {
     def flushAndClear() {
         entityManager.flush()
         entityManager.clear()
+    }
+
+    def retrieveProjectFromJson(String json) {
+        def mapper = new ObjectMapper()
+        return mapper.readValue(json, Project.class)
     }
 
 }
