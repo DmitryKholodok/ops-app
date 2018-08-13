@@ -38,7 +38,7 @@ class ProjectIntSpec extends Specification {
 
     def "it should save the project, and after check count of rows and matching of fields"() {
         given:
-            def project = retrieveProject()
+            def project = new Project(id, projectName, alternativeName, peopleCount)
 
         when:
             int projectId = projectService.createProject(project)
@@ -52,6 +52,13 @@ class ProjectIntSpec extends Specification {
                 alternativeName == project.alternativeName
                 peopleCount == project.peopleCount
             }
+
+        where:
+            id << [0, 0]
+            projectName << ["projectName", "projectName"]
+            alternativeName << ["altName", null]
+            peopleCount << [10, 15]
+
     }
 
     def "it should check a response after saving the project"() {
@@ -69,11 +76,11 @@ class ProjectIntSpec extends Specification {
             }
     }
 
-    def "it should throw EntityExistsException while saving the project"() {
+    def "it should throw EntityExistsException while saving the project when project's name already exists in the db"() {
         given:
             def project = retrieveProject()
 
-        when:
+        when: "throws exception "
             projectService.createProject(project)
             flushAndClear()
             projectService.createProject(project)
@@ -83,7 +90,7 @@ class ProjectIntSpec extends Specification {
     }
 
     def retrieveProject() {
-        return new Project(0, "projectName", "alternativeName", 10)
+        return new Project(0, "projectName", "altName", 10)
     }
 
     def flushAndClear() {
