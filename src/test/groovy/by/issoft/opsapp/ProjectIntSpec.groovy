@@ -9,6 +9,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.transaction.annotation.Transactional
 import spock.lang.Specification
@@ -61,7 +62,26 @@ class ProjectIntSpec extends Specification {
             projectName << ["projectName", "projectName"]
             alternativeName << ["altName", null]
             peopleCount << [10, 15]
+    }
 
+    def "it should throw BadRequestException when trying to save a project with invalid fields"() {
+        given:
+            def project = new Project(id, projectName, alternativeName, peopleCount)
+
+        when:
+            def response = mockMvc.perform(post('/projects')
+                    .contentType(MediaType.APPLICATION_JSON_UTF8).content(toJson(project))).andReturn().response
+
+        then:
+            with(response) {
+                status == HttpStatus.BAD_REQUEST.value()
+            }
+
+        where:
+            id << [0, -1, 0]
+            projectName << [null, "projectName", "projectName"]
+            alternativeName << ["altName", "altName", null]
+            peopleCount << [10, 15, -1]
     }
 
     def "it should check a response after saving the project"() {

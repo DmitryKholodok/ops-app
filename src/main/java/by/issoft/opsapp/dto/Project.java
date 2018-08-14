@@ -4,15 +4,26 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+
 @Getter
 @Setter
 @EqualsAndHashCode
 public class Project {
 
-    private int id;
+    @NotNull
+    @Min(0)
+    private Integer id;
+
+    @NotNull
     private String name;
+
     private String alternativeName;
-    private int peopleCount;
+
+    @NotNull
+    @Min(0)
+    private Integer peopleCount;
 
     public Project(int id, String name, String alternativeName, int peopleCount) {
         this.id = id;
