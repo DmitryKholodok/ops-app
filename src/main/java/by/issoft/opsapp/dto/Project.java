@@ -12,7 +12,7 @@ import javax.validation.constraints.NotNull;
 @EqualsAndHashCode
 public class Project {
 
-    @Min(0)
+    @Min(1)
     private Integer id;
 
     @NotNull
@@ -21,7 +21,7 @@ public class Project {
     private String alternativeName;
 
     @NotNull
-    @Min(0)
+    @Min(1)
     private Integer peopleCount;
 
     public Project(Integer id, String name, String alternativeName, Integer peopleCount) {

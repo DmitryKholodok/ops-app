@@ -35,18 +35,18 @@ public class ProjectController {
     }
 
     @GetMapping("/{id}")
-    public Project retrieveProject(@PathVariable int id) {
+    public Project retrieveProject(@PathVariable Integer id) {
         return projectService.retrieveProjectById(id);
     }
 
     @PutMapping("/{id}")
-    public void updateProject(@Valid @RequestBody Project project, BindingResult br, @PathVariable int id) {
+    public void updateProject(@Valid @RequestBody Project project, BindingResult br, @PathVariable Integer id) {
         ValidationUtil.verifyBindingResultThrows(br);
         projectService.updateProject(project, id);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteProject(@PathVariable int id) {
+    public void deleteProject(@PathVariable Integer id) {
         projectService.deleteProjectById(id);
     }
 

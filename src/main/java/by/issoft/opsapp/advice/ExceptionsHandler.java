@@ -2,6 +2,7 @@ package by.issoft.opsapp.advice;
 
 import by.issoft.opsapp.exception.InvalidEntityException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -22,11 +23,12 @@ public class ExceptionsHandler {
         return e.getMessage();
     }
 
-    @ExceptionHandler(InvalidEntityException.class)
+    @ExceptionHandler({InvalidEntityException.class, DataAccessException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public String handleBadRequestException(InvalidEntityException e) {
+    public String handleBadRequestException(Exception e) {
         log.error(e.getMessage());
         return e.getMessage();
     }
+
 
 }

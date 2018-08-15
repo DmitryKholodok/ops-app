@@ -55,7 +55,7 @@ class ProjectSpec extends Specification {
     }
 
     def "saving the project"() {
-        given: "This regex should verify header 'Content-Location' in the response"
+        given: "This regex should verify header 'Location' in the response"
         def regex = /\/projects\/[1-9]{1}[0-9]*/
 
         when:
@@ -184,7 +184,7 @@ class ProjectSpec extends Specification {
 
     def anyProject() {
         return new Project(
-                0,
+                null,
                 UUID.randomUUID().toString(),
                 UUID.randomUUID().toString(),
                 ThreadLocalRandom.current().nextInt(100))

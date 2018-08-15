@@ -18,7 +18,7 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
 
     @Transactional
-    public int saveProject(Project project) {
+    public Integer saveProject(Project project) {
         if (projectRepository.existsByName(project.getName())) {
             throw new InvalidEntityException("Project with name '" + project.getName() + "' already exists!");
         }
@@ -49,7 +49,7 @@ public class ProjectService {
     }
 
     @Transactional
-    public void deleteProjectById(int id) {
+    public void deleteProjectById(Integer id) {
         Optional<ProjectModel> projectModel = projectRepository.findById(id);
         projectRepository.delete(projectModel.orElseThrow(EntityNotFoundException::new));
     }
@@ -70,4 +70,5 @@ public class ProjectService {
             projectModel.getPeopleCount()
         );
     }
+
 }
