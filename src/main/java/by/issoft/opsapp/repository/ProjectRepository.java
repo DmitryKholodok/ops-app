@@ -8,5 +8,6 @@ import org.springframework.stereotype.Repository;
 public interface ProjectRepository extends JpaRepository<ProjectModel, Integer> {
 
     boolean existsByName(String name);
+    ProjectModel findByName(String name);
 
 }

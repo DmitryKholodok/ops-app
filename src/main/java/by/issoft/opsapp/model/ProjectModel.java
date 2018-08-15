@@ -18,16 +18,14 @@ public class ProjectModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private int id;
+    private Integer id;
 
-    @Column(name = "name", nullable = false)
+    @Column(nullable = false)
     private String name;
 
-    @Column(name = "alternative_name")
     private String alternativeName;
 
-    @Column(name = "people_count", nullable = false)
+    @Column(nullable = false)
     private Integer peopleCount;
 
 }

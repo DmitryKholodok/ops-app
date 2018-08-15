@@ -1,13 +1,13 @@
 package by.issoft.opsapp.service;
 
 import by.issoft.opsapp.dto.Project;
+import by.issoft.opsapp.exception.InvalidEntityException;
 import by.issoft.opsapp.model.ProjectModel;
 import by.issoft.opsapp.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityExistsException;
 import javax.persistence.EntityNotFoundException;
 import java.util.Optional;
 
@@ -20,7 +20,7 @@ public class ProjectService {
     @Transactional
     public int saveProject(Project project) {
         if (projectRepository.existsByName(project.getName())) {
-            throw new EntityExistsException("Project '" + project.getName() + "' already exists!");
+            throw new InvalidEntityException("Project with name '" + project.getName() + "' already exists!");
         }
         ProjectModel projectModel = projectRepository.save(toProjectModel(project));
         return projectModel.getId();
@@ -33,6 +33,19 @@ public class ProjectService {
             throw new EntityNotFoundException("Project with id = " + id + " was not found!");
         }
         return toProject(optionalProjectModel.get());
+    }
+
+    @Transactional
+    public void updateProject(Project updatedProject, Integer updatedProjectId) {
+        ProjectModel updatedPm = projectRepository.getOne(updatedProjectId); // can throw EntityNotFoundException
+        ProjectModel pm = projectRepository.findByName(updatedProject.getName());
+        if (pm != null && !pm.getId().equals(updatedProjectId)) {
+            throw new InvalidEntityException("Project with name '" + updatedPm.getName() + "' already exists!");
+        }
+        updatedPm.setName(updatedProject.getName());
+        updatedPm.setAlternativeName(updatedProject.getAlternativeName());
+        updatedPm.setPeopleCount(updatedProject.getPeopleCount());
+        projectRepository.save(updatedPm);
     }
 
     private ProjectModel toProjectModel(Project project) {
@@ -51,4 +64,5 @@ public class ProjectService {
             projectModel.getPeopleCount()
         );
     }
+
 }
