@@ -48,6 +48,12 @@ public class ProjectService {
         projectRepository.save(updatedPm);
     }
 
+    @Transactional
+    public void deleteProjectById(int id) {
+        Optional<ProjectModel> projectModel = projectRepository.findById(id);
+        projectRepository.delete(projectModel.orElseThrow(EntityNotFoundException::new));
+    }
+
     private ProjectModel toProjectModel(Project project) {
         ProjectModel projectModel = new ProjectModel();
         projectModel.setName(project.getName());
@@ -64,5 +70,4 @@ public class ProjectService {
             projectModel.getPeopleCount()
         );
     }
-
 }

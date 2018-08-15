@@ -17,6 +17,7 @@ import javax.persistence.PersistenceContext
 import java.util.concurrent.ThreadLocalRandom
 
 import static groovy.json.JsonOutput.toJson
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
@@ -147,6 +148,33 @@ class ProjectSpec extends Specification {
                     [new Project(null, "projectName", "altName", 10),
                      new Project(null, "projectName", "altName", -15)],
             ]
+    }
+
+    def 'deleting the project'() {
+        given:
+        int projectId = projectService.saveProject(anyProject())
+        flushAndClear()
+
+        when:
+        def response = mockMvc.perform(delete('/projects/' + projectId)).andReturn().getResponse()
+
+        then:
+        response.status == HttpStatus.OK.value()
+    }
+
+    def 'deleting the project with invalid id'() {
+        given:
+        projectService.saveProject(anyProject())
+        flushAndClear()
+
+        and:
+        def fakeId = Integer.MIN_VALUE
+
+        when:
+        def response = mockMvc.perform(delete('/projects/' + fakeId)).andReturn().getResponse()
+
+        then:
+        response.status == HttpStatus.NOT_FOUND.value()
     }
 
     def flushAndClear() {

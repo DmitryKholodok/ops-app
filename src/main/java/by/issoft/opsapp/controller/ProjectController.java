@@ -6,6 +6,7 @@ import by.issoft.opsapp.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -38,10 +39,17 @@ public class ProjectController {
         return projectService.retrieveProjectById(id);
     }
 
-    @PutMapping(value = "/{id}")
+    @PutMapping("/{id}")
     public void updateProject(@Valid @RequestBody Project project, BindingResult br, @PathVariable int id) {
         ValidationUtil.verifyBindingResultThrows(br);
         projectService.updateProject(project, id);
     }
+
+    @DeleteMapping("/{id}")
+    public void deleteProject(@PathVariable int id) {
+        projectService.deleteProjectById(id);
+    }
+
+
 
 }

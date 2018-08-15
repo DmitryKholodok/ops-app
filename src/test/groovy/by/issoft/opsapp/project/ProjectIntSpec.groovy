@@ -153,6 +153,40 @@ class ProjectIntSpec extends Specification {
         thrown InvalidEntityException
     }
 
+    def 'deleting the project'() {
+        given:
+        def project = anyProject()
+        def projectId = projectService.saveProject(project)
+        flushAndClear()
+
+        when:
+        projectService.deleteProjectById(projectId)
+        flushAndClear()
+
+        then:
+        projectRepository.count() == old(projectRepository.count()) - 1
+    }
+
+    def 'throws EntityNotFoundException while deleting the project'() {
+        given:
+        def project = anyProject()
+        projectService.saveProject(project)
+        flushAndClear()
+
+        and:
+        def fakeId = Integer.MIN_VALUE
+
+        when:
+        projectService.deleteProjectById(fakeId)
+        flushAndClear()
+
+        then:
+        thrown EntityNotFoundException
+
+        and:
+        projectRepository.count() == old(projectRepository.count())
+    }
+
     def anyProject() {
         return new Project(
                 0,
