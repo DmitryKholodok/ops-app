@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional
 import spock.lang.Specification
 
 import javax.persistence.EntityManager
+import javax.persistence.EntityNotFoundException
 import javax.persistence.PersistenceContext
 import java.util.concurrent.ThreadLocalRandom
 
@@ -72,6 +73,47 @@ class IssueIntSpec extends Specification {
         issueRepository.count() == old(issueRepository.count())
     }
 
+    def 'getting the issue'() {
+        given:
+        def projectId = projectService.saveProject(anyProject())
+        flushAndClear()
+
+        and:
+        def issue = anyIssue(projectId)
+        def issueId = issueService.saveIssue(issue)
+        flushAndClear()
+
+        when:
+        def issueFromDb = issueService.retrieveIssueById(issueId)
+
+        then:
+        with(issueFromDb) {
+            id == issueId
+            projectId == issue.projectId
+            description == issue.description
+        }
+    }
+
+    def 'getting the issue with invalid id'() {
+        given:
+        def projectId = projectService.saveProject(anyProject())
+        flushAndClear()
+
+        and:
+        def issue = anyIssue(projectId)
+        issueService.saveIssue(issue)
+        flushAndClear()
+
+        and:
+        def fakeIssueId = Integer.MIN_VALUE
+
+        when:
+        issueService.retrieveIssueById(fakeIssueId)
+
+        then:
+        thrown EntityNotFoundException
+    }
+
     def anyIssue(Integer projectId) {
         Issue issue = new Issue()
         issue.setDescription(UUID.randomUUID().toString())
@@ -91,5 +133,4 @@ class IssueIntSpec extends Specification {
         entityManager.flush()
         entityManager.clear()
     }
-
 }

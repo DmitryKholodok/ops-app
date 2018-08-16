@@ -4,6 +4,7 @@ import by.issoft.opsapp.dto.Issue
 import by.issoft.opsapp.dto.Project
 import by.issoft.opsapp.service.IssueService
 import by.issoft.opsapp.service.ProjectService
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
@@ -18,7 +19,8 @@ import javax.persistence.PersistenceContext
 import java.util.concurrent.ThreadLocalRandom
 
 import static groovy.json.JsonOutput.toJson
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -33,6 +35,9 @@ class IssueSpec extends Specification {
 
     @Autowired
     ProjectService projectService
+
+    @Autowired
+    IssueService issueService
 
     def "saving the issue"() {
         given: "This regex should verify header 'Location' in the response"
@@ -71,6 +76,50 @@ class IssueSpec extends Specification {
         response.status == HttpStatus.BAD_REQUEST.value()
     }
 
+    def 'getting the issue'() {
+        given:
+        def projectId = projectService.saveProject(anyProject())
+        flushAndClear()
+
+        and:
+        def issue = anyIssue(projectId)
+        def issueId = issueService.saveIssue(issue)
+        flushAndClear()
+
+        when:
+        def test = issueService.retrieveIssueById(issueId);
+        def response = mockMvc.perform(get('/issues/' + issueId)).andReturn().getResponse()
+
+        then:
+        response.status == HttpStatus.OK.value()
+
+        and:
+        def issueFromJson = retrieveIssueFromJson(response.getContentAsString())
+        issueFromJson.id == issueId
+        issueFromJson.projectId == issue.projectId
+        issueFromJson.description == issue.description
+    }
+
+    def 'getting the issue with invalid id'() {
+        given:
+        def projectId = projectService.saveProject(anyProject())
+        flushAndClear()
+
+        and:
+        def issue = anyIssue(projectId)
+        issueService.saveIssue(issue)
+        flushAndClear()
+
+        and:
+        def fakeIssueId = Integer.MIN_VALUE
+
+        when:
+        def response = mockMvc.perform(get('/issues/' + fakeIssueId)).andReturn().getResponse()
+
+        then:
+        response.status == HttpStatus.NOT_FOUND.value()
+    }
+
     def anyIssue(Integer projectId) {
         Issue issue = new Issue()
         issue.setDescription(UUID.randomUUID().toString())
@@ -91,4 +140,8 @@ class IssueSpec extends Specification {
         entityManager.clear()
     }
 
+    def retrieveIssueFromJson(String json) {
+        def mapper = new ObjectMapper()
+        return mapper.readValue(json, Issue.class)
+    }
 }

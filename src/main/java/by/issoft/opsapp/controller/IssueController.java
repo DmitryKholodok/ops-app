@@ -6,10 +6,7 @@ import by.issoft.opsapp.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.net.URI;
@@ -28,6 +25,11 @@ public class IssueController {
         return ResponseEntity
                 .created(URI.create("/issues/" + issueId))
                 .build();
+    }
+
+    @GetMapping("/{id}")
+    public Issue retrieveIssue(@PathVariable Integer id) {
+        return issueService.retrieveIssueById(id);
     }
 
 }
