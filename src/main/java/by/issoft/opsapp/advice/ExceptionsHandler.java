@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import javax.persistence.EntityExistsException;
 import javax.persistence.EntityNotFoundException;
 
 @Slf4j
@@ -29,6 +30,14 @@ public class ExceptionsHandler {
         log.error(e.getMessage());
         return e.getMessage();
     }
+
+    @ExceptionHandler(EntityExistsException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public String handleEntityExistsException(EntityExistsException e) {
+        log.error(e.getMessage());
+        return e.getMessage();
+    }
+
 
 
 }
