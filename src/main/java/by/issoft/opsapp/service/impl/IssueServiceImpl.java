@@ -20,8 +20,7 @@ public class IssueServiceImpl implements IssueService {
     @Override
     @Transactional
     public Integer saveIssue(Issue issue) {
-        IssueModel issueModel = toIssueModel(issue);
-        return issueRepository.save(issueModel).getId();
+        return issueRepository.save(toIssueModel(issue)).getId();
     }
 
     @Override

@@ -61,7 +61,7 @@ class IssueSpec extends Specification {
         }
     }
 
-    def "saving the project with invalid fields"() {
+    def "saving the project with non-existing project id"() {
         given:
         def fakeProjectId = Integer.MIN_VALUE
 
@@ -76,6 +76,23 @@ class IssueSpec extends Specification {
         response.status == HttpStatus.BAD_REQUEST.value()
     }
 
+    def "saving the issue with invalid fields"() {
+        when:
+        def response = mockMvc.perform(post('/projects')
+                .contentType(MediaType.APPLICATION_JSON_UTF8).content(toJson(issue))).andReturn().response
+
+        then:
+        response.status == HttpStatus.BAD_REQUEST.value()
+
+        where:
+        [issue] << [
+                [new Issue(-13, "Do not work all!", 3)],
+                [new Issue(null, null, 3)],
+                [new Issue(null, "Do not work all!", null)],
+                [new Issue(null, "Do not work all!", 0)]
+        ]
+    }
+
     def 'getting the issue'() {
         given:
         def projectId = projectService.saveProject(anyProject())
@@ -87,7 +104,6 @@ class IssueSpec extends Specification {
         flushAndClear()
 
         when:
-        def test = issueService.retrieveIssueById(issueId);
         def response = mockMvc.perform(get('/issues/' + issueId)).andReturn().getResponse()
 
         then:

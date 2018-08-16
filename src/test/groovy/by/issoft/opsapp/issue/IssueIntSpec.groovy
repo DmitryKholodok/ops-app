@@ -55,7 +55,7 @@ class IssueIntSpec extends Specification {
         }
     }
 
-    def "saving the issue with invalid fields"() {
+    def "saving the issue with non-existing project id"() {
         given:
         def fakeProjectId = Integer.MIN_VALUE
 
@@ -94,7 +94,7 @@ class IssueIntSpec extends Specification {
         }
     }
 
-    def 'getting the issue with invalid id'() {
+    def 'getting the issue with non-existing id'() {
         given:
         def projectId = projectService.saveProject(anyProject())
         flushAndClear()

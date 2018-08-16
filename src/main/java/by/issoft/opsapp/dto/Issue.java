@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 @Getter
@@ -13,11 +14,19 @@ public class Issue {
     @Min(1)
     private Integer id;
 
-    @NotNull
+    @NotBlank
     private String description;
 
     @Min(1)
     @NotNull
     private Integer projectId;
 
+    public Issue(Integer id, String description, Integer projectId) {
+        this.id = id;
+        this.description = description;
+        this.projectId = projectId;
+    }
+
+    public Issue() {
+    }
 }
